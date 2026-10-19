@@ -124,6 +124,9 @@ export class Shop {
       if (!pending) return { ok: false, error: "🛒 tap ✅ checkout first" };
       const existing = d.orders[pending.id];
       if (existing) return { ok: true, order: existing };
+      // "digital" skips the address, so only an all-digital cart may use it.
+      const physical = pending.items.find((i) => !this.catalog.products.find((p) => p.sku === i.sku)?.digital);
+      if (note === "digital" && physical) return { ok: false, error: `📦 ${physical.emoji} ${physical.name} ships: reply with a name and address.` };
       for (const item of pending.items) {
         if (this.available(item.sku, d) < item.qty) return { ok: false, error: `😢 ${item.emoji} ${item.name} just sold out. Check your 🛒 cart.` };
       }

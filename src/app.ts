@@ -19,8 +19,8 @@ export function buildShop(cfg: Config, opts: { selfUrl?: string; log?: (l: strin
   const phone = cfg.telegramToken
     ? null
     : new Phone(bot, [
-        { id: 1001, title: "Merch Shop", first_name: "Buyer", username: "buyer_demo" },
-        { id: cfg.adminChatId ?? 2002, title: "Seller alerts", first_name: "Shop", username: "shop_owner_demo" },
+        { id: 1001, title: cfg.catalog.shop, first_name: "Buyer", username: "buyer_demo" },
+        { id: cfg.adminChatId ?? 2002, title: "seller alerts", first_name: "Shop", username: "shop_owner_demo" },
       ]);
   const deps = { shop, adminChatId: cfg.adminChatId, log };
   createBot(bot, deps);

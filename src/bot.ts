@@ -156,7 +156,7 @@ export function createBot(bot: Bot, deps: BotDeps): Bot {
     const allDigital = r.items.every((i) => shop.product(i.sku)?.digital);
     await ctx.reply(
       [`✅ <b>Checkout · ${esc(money(r.total, shop.catalog.currency))}</b>`, "", allDigital ? "All digital: tap 📦 digital." : "📦 Where should we ship it? Reply with a name and address.", "<i>Plain text, no links.</i>"].join("\n"),
-      { ...HTML, reply_markup: new InlineKeyboard().text("📦 digital", "digital").text("✖️ cancel", "cancel") },
+      { ...HTML, reply_markup: allDigital ? new InlineKeyboard().text("📦 digital", "digital").text("✖️ cancel", "cancel") : new InlineKeyboard().text("✖️ cancel", "cancel") },
     );
   };
 

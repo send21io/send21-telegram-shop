@@ -47,7 +47,17 @@
     if (key !== last) {
       last = key;
       const log = $("log");
-      if (!chat.messages.length) log.replaceChildren(el("p", "hint", chat.id === 1001 ? "Type /start to open the shop 👇" : "Order alerts for the seller land here."));
+      if (!chat.messages.length) {
+        const box = el("div", "empty");
+        box.append(el("div", "big", chat.id === 1001 ? "🛍️" : "🔔"));
+        if (chat.id === 1001) {
+          box.append(el("p", "", "Your shop bot is ready 👋"));
+          const go = el("button", "chip", "▶️ /start");
+          go.onclick = () => post("/phone/api/send", { chat: chatId, text: "/start" });
+          box.append(go, el("p", "", "or type it below 👇"));
+        } else box.append(el("p", "", "🔕 no orders yet · paid orders ping you here"));
+        log.replaceChildren(box);
+      }
       else
         log.replaceChildren(
           ...chat.messages.map((m) => {
@@ -56,7 +66,7 @@
             if (m.photo) {
               const img = el("img", "photo");
               img.src = m.photo;
-              img.alt = "QR code";
+              img.alt = "QR code for the pay link";
               bubble.append(img);
             }
             const text = el("div", "text");

@@ -105,7 +105,7 @@ describe("mock pay page → signed webhook → 🎉 in the chat", () => {
     expect(page).toContain("€8.00");
     expect(page).toContain("🧪 mock send21");
     const r = await fetch(`${w.url}${path}/paid`, { method: "POST", body: new URLSearchParams({ coin: "1" }) });
-    expect(await r.text()).toContain("sent draft.confirmed");
+    expect(await r.text()).toContain("📨 sent <code>draft.confirmed</code>");
     await w.settle();
     expect(w.store.getOrder(o.id)?.status).toBe("paid");
     expect(w.text(w.lastBot())).toMatch(/^🎉 Paid, order #1!/);
@@ -120,6 +120,48 @@ describe("mock pay page → signed webhook → 🎉 in the chat", () => {
     await w.settle();
     expect(w.store.getOrder(o.id)?.status).toBe("review");
     expect(w.text(w.lastBot(ADMIN))).toContain("Accept or decline it on send21.");
+    await w.close();
+  });
+
+  it("👍 accept the short pay sends mismatch_accepted → confirmed and marks it paid", async () => {
+    const w = await world();
+    const o = (await checkout(w, { hoodie: 1 }))!;
+    const path = new URL(o.payUrl!).pathname;
+    await fetch(`${w.url}${path}/short`, { method: "POST", body: new URLSearchParams({ coin: "0" }) });
+    const r = await fetch(`${w.url}${path}/accept`, { method: "POST", body: new URLSearchParams({ coin: "0" }) });
+    expect(await r.text()).toContain("draft.mismatch_accepted → draft.confirmed");
+    await w.settle();
+    expect(w.store.getOrder(o.id)?.status).toBe("paid");
+    expect(w.text(w.lastBot(ADMIN))).toContain("⚠️ a different amount was accepted on send21");
+    await w.close();
+  });
+
+  it("↩️ decline the short pay cancels the order", async () => {
+    const w = await world();
+    const o = (await checkout(w, { hoodie: 1 }))!;
+    const path = new URL(o.payUrl!).pathname;
+    await fetch(`${w.url}${path}/short`, { method: "POST", body: new URLSearchParams({ coin: "0" }) });
+    await fetch(`${w.url}${path}/decline`, { method: "POST", body: new URLSearchParams({ coin: "0" }) });
+    await w.settle();
+    expect(w.store.getOrder(o.id)?.status).toBe("declined");
+    expect(w.text(w.lastBot())).toMatch(/^↩️ order #1 was cancelled/);
+    await w.close();
+  });
+
+  it("an unknown action is a 404 and does NOT expire the order (it used to)", async () => {
+    const w = await world();
+    const o = (await checkout(w, { hoodie: 1 }))!;
+    const r = await fetch(`${w.url}${new URL(o.payUrl!).pathname}/oops`, { method: "POST", body: new URLSearchParams({ coin: "0" }) });
+    expect(r.status).toBe(404);
+    await w.settle();
+    expect(w.store.getOrder(o.id)?.status).toBe("open");
+    await w.close();
+  });
+
+  it("the mock chat is named after the shop", async () => {
+    const w = await world();
+    const state = (await (await fetch(`${w.url}/phone/api/state`)).json()) as { chats: { id: number; title: string }[] };
+    expect(state.chats.find((c) => c.id === 1001)?.title).toBe("Pixel Merch");
     await w.close();
   });
 });

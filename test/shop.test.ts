@@ -63,8 +63,25 @@ describe("cart and stock", () => {
     w.shop.startCheckout(BUYER);
     expect((await w.shop.placeOrder(BUYER, "@a", "see https://evil.com")).ok).toBe(false);
     expect(w.shop.chat(BUYER).pending).not.toBeNull();
-    expect((await w.shop.placeOrder(BUYER, "@a", "DIGITAL")).ok).toBe(true);
+    expect((await w.shop.placeOrder(BUYER, "@a", "Kim, Street 1, 12345 Town")).ok).toBe(true);
     await w.close();
+  });
+
+  it("📦 digital only skips the address when every item is digital", async () => {
+    const w = await world();
+    w.shop.add(BUYER, "hoodie");
+    w.shop.add(BUYER, "wallpapers");
+    w.shop.startCheckout(BUYER);
+    expect(await w.shop.placeOrder(BUYER, "@a", "digital")).toEqual({ ok: false, error: "📦 🧥 Hoodie ships: reply with a name and address." });
+    expect(w.shop.chat(BUYER).pending).not.toBeNull();
+
+    const v = await world();
+    v.shop.add(BUYER, "wallpapers");
+    v.shop.startCheckout(BUYER);
+    const r = await v.shop.placeOrder(BUYER, "@a", "DIGITAL");
+    expect(r.ok && r.order.note).toBe("digital");
+    await w.close();
+    await v.close();
   });
 });
 

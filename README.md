@@ -12,7 +12,7 @@
 
 ## Quickstart
 
-1. **Try it now, no keys at all:** `npm install && npm run dev`, open http://localhost:3000/phone and type `/start`. Mock Telegram + mock send21: add items, ✅ check out, tap 💳 Pay, then ✅ pay on the mock page and go back to the chat. The 🔔 tab is the seller's chat.
+1. **Try it now, no keys at all:** `npm install && npm run dev`, open http://localhost:3000/phone and type `/start`. Mock Telegram + mock send21: add items, ✅ check out, tap 💳 Pay, then ✅ pay on the mock page (or try ⚠️ short → 👍 accept / ↩️ decline, or ⌛ expire) and go back to the chat. The 🔔 tab is the seller's chat.
 2. **Telegram bot.** Create one with @BotFather and put `TELEGRAM_BOT_TOKEN` in `.env` (`cp .env.example .env`). Run it, send `/whoami` to your bot and put that number in `ADMIN_CHAT_ID`.
 3. **send21 key and addresses.** On [send21.io/api-keys](https://send21.io/api-keys), create a key with `drafts:write` (add `webhooks:manage` for step 4). Set `SEND21_API_KEY` and your own receiving addresses: `PAY_LIGHTNING=you@your-wallet.com` and/or `PAY_OPTIONS=usdc-sol:<address>,usdt-eth:<address>`.
 4. **Webhook.** Put the server behind your own HTTPS address (`PUBLIC_URL`, for example a reverse proxy with a free Let's Encrypt certificate and `TRUST_PROXY=1`), then `npm run webhook:register` and paste the printed `SEND21_WEBHOOK_SECRET` into `.env`.
@@ -26,7 +26,7 @@
 
 ## How it works
 
-`/start` shows the catalog. ➕ and ➖ edit that one message in place. **✅ checkout** freezes the cart under a fresh order id and asks for a shipping note (or 📦 digital). When the note arrives, the server reserves the stock and stores the order in **one write**, then creates **one** send21 payment request for the order total, priced in fiat, with `orderId` `tg-<id>` that is also the `Idempotency-Key`. The bot sends a 💳 Pay button and a QR of the same link. The buyer pays on the send21 pay page from their own wallet.
+`/start` shows the catalog. ➕ and ➖ edit that one message in place. **✅ checkout** freezes the cart under a fresh order id and asks for a shipping note (📦 digital is offered, and accepted, only when every item in the cart is digital). When the note arrives, the server reserves the stock and stores the order in **one write**, then creates **one** send21 payment request for the order total, priced in fiat, with `orderId` `tg-<id>` that is also the `Idempotency-Key`. The bot sends a 💳 Pay button and a QR of the same link. The buyer pays on the send21 pay page from their own wallet.
 
 ```mermaid
 sequenceDiagram
