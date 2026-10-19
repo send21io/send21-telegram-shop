@@ -1,0 +1,10 @@
+{
+  "shop": "Pixel Merch",
+  "currency": "EUR",
+  "products": [
+    { "sku": "sticker-pack", "name": "Sticker pack", "emoji": "🌈", "price": 4, "stock": 40 },
+    { "sku": "a3-print", "name": "A3 print", "emoji": "🖼️", "price": 18, "stock": 8 },
+    { "sku": "hoodie", "name": "Hoodie", "emoji": "🧥", "price": 45, "stock": 3 },
+    { "sku": "wallpapers", "name": "Wallpaper pack", "emoji": "📱", "price": 3, "stock": 1000, "digital": true }
+  ]
+}

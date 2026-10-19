@@ -1,0 +1,13 @@
+:root { --orange: #f7931a; --cream: #fef8ec; --ink: #1b1c20; --muted: #7a7466; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--cream); display: grid; place-items: center; }
+.pay { width: min(92vw, 380px); background: #fff; border-radius: 22px; padding: 22px; box-shadow: 0 10px 40px #0001; text-align: center; }
+.mock { display: inline-block; margin: 0 0 6px; padding: 3px 10px; border-radius: 10px; background: #fff1dc; color: #9a5a00; font-size: 13px; }
+.big { font-size: 34px; font-weight: 800; margin: 6px 0; }
+.row { display: flex; gap: 8px; margin: 8px 0; }
+select { flex: 1; min-width: 0; border: 1px solid #e5dccb; border-radius: 12px; padding: 8px; font: inherit; background: #fff; }
+button, .go { border: 0; border-radius: 12px; padding: 9px 12px; background: var(--ink); color: #fff; font: 600 15px system-ui, sans-serif; cursor: pointer; text-decoration: none; }
+.go { display: inline-block; margin-top: 12px; background: var(--orange); }
+.foot { font-size: 13px; color: var(--muted); }
+.foot a { color: inherit; }
+.row button { flex: 0 0 48%; }
