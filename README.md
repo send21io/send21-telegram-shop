@@ -15,6 +15,7 @@
 1. **Try it now, no keys at all:** `npm install && npm run dev`, open http://localhost:3000/phone and type `/start`. Mock Telegram + mock send21: add items, ✅ check out, tap 💳 Pay, then ✅ pay on the mock page (or try ⚠️ short → 👍 accept / ↩️ decline, or ⌛ expire) and go back to the chat. The 🔔 tab is the seller's chat.
 2. **Telegram bot.** Create one with @BotFather and put `TELEGRAM_BOT_TOKEN` in `.env` (`cp .env.example .env`). Run it, send `/whoami` to your bot and put that number in `ADMIN_CHAT_ID`.
 3. **send21 key and addresses.** On [send21.io/api-keys](https://send21.io/api-keys), create a key with `drafts:write` (add `webhooks:manage` for step 4). Set `SEND21_API_KEY` and your own receiving addresses: `PAY_LIGHTNING=you@your-wallet.com` and/or `PAY_OPTIONS=usdc-sol:<address>,usdt-eth:<address>`.
+   - 🔐 **Approve your receiving addresses in send21.** New send21 accounts (created on or after 20 Oct 2026) only accept receiving addresses the owner approved, including Lightning addresses. Add them in the send21 app, or propose one from an agent (MCP `propose_receiving_address`), then sign in and approve it with a passkey or authenticator code. No API key can approve an address. Older accounts can opt in under Settings.
 4. **Webhook.** Put the server behind your own HTTPS address (`PUBLIC_URL`, for example a reverse proxy with a free Let's Encrypt certificate and `TRUST_PROXY=1`), then `npm run webhook:register` and paste the printed `SEND21_WEBHOOK_SECRET` into `.env`.
 5. **Your products and go.** `cp products.example.json products.json`, edit it, then `npm run build && npm start`. Long polling by default; for a Telegram webhook set `TELEGRAM_WEBHOOK_URL` + `TELEGRAM_WEBHOOK_SECRET`.
 
@@ -61,6 +62,10 @@ A late payment after expiry still counts as paid, and your 💰 alert says to ch
 **Modes.** No `TELEGRAM_BOT_TOKEN` = mock Telegram (📱 `/phone`, bound to localhost). No `SEND21_API_KEY` = mock send21 (pay links open a local simulator that sends really signed webhooks). A real token with mock send21 works too, but the 💳 button then points at `PUBLIC_URL`, so it must be reachable from the buyer's phone.
 
 **Fees.** One small send21 fee per paid order (0.49% on small payments, at least $0.01), never taken from the payment. See [pricing](https://send21.io/pricing).
+
+## Troubleshooting
+
+- **422 `address_not_approved`:** a receiving address isn't approved in your send21 account, so nothing was created. Sign in to send21, approve the address (passkey or authenticator code), then try again.
 
 ## Security notes
 

@@ -41,9 +41,18 @@ export interface Send21Client {
 }
 
 export class Send21Error extends Error {
-  constructor(message: string, readonly status: number) {
+  constructor(message: string, readonly status: number, readonly code?: string) {
     super(message);
   }
+}
+
+/**
+ * New send21 accounts only accept receiving addresses the owner approved in the
+ * app (passkey or authenticator code). Any other address: 422 address_not_approved,
+ * nothing is created. https://send21.io/docs/mcp
+ */
+function errorCode(json: unknown): string | undefined {
+  return (JSON.stringify(json) ?? "").includes("address_not_approved") ? "address_not_approved" : undefined;
 }
 
 /** Short, user-safe text for a failed create call. */
@@ -52,6 +61,7 @@ export function friendlyError(err: unknown): string {
   if (status === 402) return "🧾 the shop's send21 account has fees to settle first.";
   if (status === 409) return "🔁 this order already has a different pay link. Check out again.";
   if (status === 429) return "🐢 too many requests. Try again in a minute.";
+  if (err instanceof Send21Error && err.code === "address_not_approved") return "🔐 the shop hasn't approved this receiving address in send21 yet, so no pay link was made.";
   if (status === 400 || status === 422) return "❌ send21 refused it (check the shop addresses).";
   return "😵 send21 didn't answer. Try again.";
 }
@@ -79,7 +89,9 @@ export function createSend21Client({ apiBase = "https://send21.io", apiKey, fetc
       const json = (await res.json().catch(() => null)) as PaymentRequestResponse | null;
       if (!res.ok || !json) {
         // Never log the key or the request headers; the body is safe to log.
-        throw new Send21Error(`send21 POST /payment-requests: ${res.status} ${JSON.stringify(json)?.slice(0, 300)}`, res.status);
+        const code = errorCode(json);
+        const hint = code ? " (approve this receiving address in send21: sign in, approve it with a passkey or authenticator code, then retry)" : "";
+        throw new Send21Error(`send21 POST /payment-requests: ${res.status} ${JSON.stringify(json)?.slice(0, 300)}${hint}`, res.status, code);
       }
       if (typeof json.id !== "string" || typeof json.payPath !== "string") throw new Send21Error("send21: response without id/payPath", 502);
       return json;
